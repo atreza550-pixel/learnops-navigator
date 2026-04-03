@@ -19,6 +19,8 @@ interface AuthContextType {
   login: (email: string, password: string) => boolean;
   register: (name: string, email: string, password: string) => boolean;
   logout: () => void;
+  updateCurrentUser: (updates: Partial<User>) => void;
+  resetProgress: () => void;
   isAuthenticated: boolean;
   isAdmin: boolean;
 }
@@ -37,7 +39,7 @@ const stripPassword = (u: UserWithPassword): User => {
 };
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { users, addUser } = useDataStore();
+  const { users, addUser, updateUser } = useDataStore();
   const [currentUser, setCurrentUser] = useState<User | null>(() => {
     const saved = localStorage.getItem("learnops_user");
     return saved ? JSON.parse(saved) : null;
@@ -82,6 +84,25 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     toast.info("Déconnexion réussie");
   }, []);
 
+  const updateCurrentUser = useCallback((updates: Partial<User>) => {
+    if (!currentUser) return;
+    const updated = { ...currentUser, ...updates };
+    if (updates.name) {
+      updated.avatar = updates.name.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2);
+    }
+    setCurrentUser(updated);
+    updateUser(currentUser.id, updates);
+  }, [currentUser, updateUser]);
+
+  const resetProgress = useCallback(() => {
+    if (!currentUser) return;
+    const reset = { completedModules: [] as string[], totalPoints: 0, streak: 0 };
+    setCurrentUser({ ...currentUser, ...reset });
+    updateUser(currentUser.id, reset);
+    localStorage.removeItem("learnops_quiz_attempts");
+    toast.success("Progression réinitialisée");
+  }, [currentUser, updateUser]);
+
   return (
     <AuthContext.Provider
       value={{
@@ -89,6 +110,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         login,
         register,
         logout,
+        updateCurrentUser,
+        resetProgress,
         isAuthenticated: !!currentUser,
         isAdmin: currentUser?.role === "admin",
       }}
