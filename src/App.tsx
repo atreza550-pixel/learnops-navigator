@@ -6,6 +6,9 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import AppNavbar from "@/components/AppNavbar";
+import AdminLayout from "@/components/AdminLayout";
+import PageTransition from "@/components/PageTransition";
+import HelpButton from "@/components/HelpButton";
 import Login from "@/pages/Login";
 import Register from "@/pages/Register";
 import Home from "@/pages/Home";
@@ -14,7 +17,7 @@ import Profile from "@/pages/Profile";
 import ModuleDetail from "@/pages/ModuleDetail";
 import LessonDetail from "@/pages/LessonDetail";
 import Quiz from "@/pages/Quiz";
-import Admin from "@/pages/Admin";
+import AdminOverview from "@/pages/admin/AdminOverview";
 import AdminUsers from "@/pages/admin/AdminUsers";
 import AdminModules from "@/pages/admin/AdminModules";
 import AdminAnalytics from "@/pages/admin/AdminAnalytics";
@@ -22,10 +25,21 @@ import NotFound from "@/pages/NotFound";
 
 const queryClient = new QueryClient();
 
-const ProtectedLayout = ({ children, adminOnly = false }: { children: React.ReactNode; adminOnly?: boolean }) => (
-  <ProtectedRoute adminOnly={adminOnly}>
-    <div className="pb-16">{children}</div>
+const ProtectedLayout = ({ children }: { children: React.ReactNode }) => (
+  <ProtectedRoute>
+    <PageTransition>
+      <div className="pb-16">{children}</div>
+    </PageTransition>
     <AppNavbar />
+    <HelpButton />
+  </ProtectedRoute>
+);
+
+const AdminRoute = ({ children }: { children: React.ReactNode }) => (
+  <ProtectedRoute adminOnly>
+    <AdminLayout>
+      <PageTransition>{children}</PageTransition>
+    </AdminLayout>
   </ProtectedRoute>
 );
 
@@ -46,12 +60,10 @@ const App = () => (
             <Route path="/modules/:moduleId" element={<ProtectedLayout><ModuleDetail /></ProtectedLayout>} />
             <Route path="/modules/:moduleId/lessons/:lessonId" element={<ProtectedLayout><LessonDetail /></ProtectedLayout>} />
             <Route path="/quiz/:moduleId" element={<ProtectedLayout><Quiz /></ProtectedLayout>} />
-            <Route path="/admin" element={<ProtectedLayout adminOnly><Admin /></ProtectedLayout>}>
-              <Route index element={<Navigate to="/admin/users" replace />} />
-              <Route path="users" element={<AdminUsers />} />
-              <Route path="modules" element={<AdminModules />} />
-              <Route path="analytics" element={<AdminAnalytics />} />
-            </Route>
+            <Route path="/admin" element={<AdminRoute><AdminOverview /></AdminRoute>} />
+            <Route path="/admin/users" element={<AdminRoute><AdminUsers /></AdminRoute>} />
+            <Route path="/admin/modules" element={<AdminRoute><AdminModules /></AdminRoute>} />
+            <Route path="/admin/analytics" element={<AdminRoute><AdminAnalytics /></AdminRoute>} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </AuthProvider>
