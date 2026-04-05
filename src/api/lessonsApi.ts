@@ -41,7 +41,7 @@ export async function complete(lessonId: string): Promise<CompleteResult> {
   // Get or create progress
   let prog = db.findWhere<DBProgress>("progress", (p) => p.userId === userId && p.moduleId === lesson.moduleId)[0];
   if (!prog) {
-    prog = db.insert<DBProgress>("progress", {
+    prog = db.insert("progress", {
       id: `p${Date.now()}`, userId, moduleId: lesson.moduleId,
       completedLessons: [], quizPassed: false, quizScore: null,
     });
@@ -71,14 +71,14 @@ export async function complete(lessonId: string): Promise<CompleteResult> {
   }
 
   // Create notification
-  db.insert<DBNotification>("notifications", {
+  db.insert("notifications", {
     id: `n${Date.now()}`, userId, type: "success",
     message: `Leçon "${lesson.title}" complétée ! +${pointsEarned} pts`,
     time: "À l'instant", read: false, createdAt: new Date().toISOString(),
   });
 
   if (badgesUnlocked.length > 0) {
-    db.insert<DBNotification>("notifications", {
+    db.insert("notifications", {
       id: `n${Date.now() + 1}`, userId, type: "trophy",
       message: `Badge débloqué : ${badgesUnlocked.join(", ")} !`,
       time: "À l'instant", read: false, createdAt: new Date().toISOString(),
@@ -91,12 +91,12 @@ export async function complete(lessonId: string): Promise<CompleteResult> {
 // Admin CRUD
 export async function createLesson(data: Omit<DBLesson, "id">): Promise<DBLesson> {
   await fakeDelay();
-  return db.insert<DBLesson>("lessons", data);
+  return db.insert("lessons", data);
 }
 
 export async function updateLesson(id: string, data: Partial<DBLesson>): Promise<DBLesson | undefined> {
   await fakeDelay();
-  return db.update<DBLesson>("lessons", id, data);
+  return db.update("lessons", id, data);
 }
 
 export async function deleteLesson(id: string): Promise<void> {

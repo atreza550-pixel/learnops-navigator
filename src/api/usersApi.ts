@@ -20,7 +20,7 @@ export async function getById(id: string): Promise<SafeUser | null> {
 
 export async function update(id: string, data: Partial<DBUser>): Promise<SafeUser | undefined> {
   await fakeDelay();
-  const updated = db.update<DBUser>("users", id, data);
+  const updated = db.update("users", id, data);
   return updated ? strip(updated) : undefined;
 }
 
@@ -35,7 +35,7 @@ export async function create(data: { name: string; email: string; password: stri
   if (existing.length > 0) throw new ApiError(409, "Cet email existe déjà");
   const avatar = data.name.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2);
   const colors = ["#6366f1", "#f59e0b", "#10b981", "#0ea5e9", "#ec4899"];
-  const newUser = db.insert<DBUser>("users", {
+  const newUser = db.insert("users", {
     id: `u${Date.now()}`, ...data, avatar,
     avatarColor: colors[Math.floor(Math.random() * colors.length)],
     joinedAt: new Date().toISOString().split("T")[0],
@@ -65,7 +65,7 @@ export async function updateProfile(data: { name?: string; email?: string }): Pr
     updates.avatar = data.name.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2);
   }
   if (data.email) updates.email = data.email;
-  const updated = db.update<DBUser>("users", userId, updates);
+  const updated = db.update("users", userId, updates);
   return updated ? strip(updated) : undefined;
 }
 

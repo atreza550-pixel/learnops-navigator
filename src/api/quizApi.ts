@@ -31,7 +31,7 @@ export async function submit(quizId: string, answers: number[]): Promise<QuizRes
   const passed = percentage >= quiz.passingScore;
 
   // Save attempt
-  db.insert<DBAttempt>("attempts", {
+  db.insert("attempts", {
     id: `a${Date.now()}`, userId, moduleId: quiz.moduleId, quizId,
     score, total, percentage, passed,
     date: new Date().toISOString(), duration: `${Math.floor(Math.random() * 5 + 3)}min`,
@@ -56,7 +56,7 @@ export async function submit(quizId: string, answers: number[]): Promise<QuizRes
   }
 
   // Notification
-  db.insert<DBNotification>("notifications", {
+  db.insert("notifications", {
     id: `n${Date.now()}`, userId, type: passed ? "success" : "warning",
     message: passed ? `Quiz "${quiz.title}" réussi avec ${percentage}% ! +${pointsEarned} pts` : `Quiz "${quiz.title}" échoué (${percentage}%). Réessayez !`,
     time: "À l'instant", read: false, createdAt: new Date().toISOString(),

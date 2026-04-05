@@ -39,12 +39,12 @@ export async function getById(id: string): Promise<ModuleWithProgress | null> {
 
 export async function create(data: Omit<DBModule, "id">): Promise<DBModule> {
   await fakeDelay();
-  return db.insert<DBModule>("modules", data);
+  return db.insert("modules", data);
 }
 
 export async function update(id: string, data: Partial<DBModule>): Promise<DBModule | undefined> {
   await fakeDelay();
-  return db.update<DBModule>("modules", id, data);
+  return db.update("modules", id, data);
 }
 
 export async function remove(id: string): Promise<void> {

@@ -39,7 +39,7 @@ export async function register(name: string, email: string, password: string): P
     lastActiveDate: new Date().toISOString().split("T")[0],
     completedModules: [],
   };
-  db.insert<DBUser>("users", newUser);
+  db.insert("users", newUser);
   const token = generateToken(newUser);
   localStorage.setItem("loj_token", token);
   return { user: stripPassword(newUser), token };

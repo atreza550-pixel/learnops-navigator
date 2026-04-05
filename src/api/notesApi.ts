@@ -17,7 +17,7 @@ export async function save(lessonId: string, content: string): Promise<void> {
   if (existing) {
     db.update("notes", existing.id, { content, updatedAt: new Date().toISOString() });
   } else {
-    db.insert<DBNote>("notes", {
+    db.insert("notes", {
       id: `note${Date.now()}`, userId, lessonId, content, updatedAt: new Date().toISOString(),
     });
   }
