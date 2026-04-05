@@ -6,7 +6,7 @@ export interface User {
   id: string;
   name: string;
   email: string;
-  role: "student" | "admin";
+  role: "student" | "admin" | "instructor";
   avatar: string;
   joinedAt: string;
   totalPoints: number;

@@ -45,21 +45,21 @@ class Database {
     return this.get<T>(key).filter(predicate);
   }
 
-  insert<T extends { id?: string }>(key: DBKey, record: Omit<T, "id"> & { id?: string }): T {
-    const items = this.get<T>(key);
-    const newRecord = { ...record, id: record.id || `${key[0]}${Date.now()}`, createdAt: new Date().toISOString() } as T;
+  insert(key: DBKey, record: any): any {
+    const items = this.get(key);
+    const newRecord = { ...record, id: record.id || `${key[0]}${Date.now()}`, createdAt: new Date().toISOString() };
     items.push(newRecord);
     this.set(key, items);
     return newRecord;
   }
 
-  update<T extends { id: string }>(key: DBKey, id: string, changes: Partial<T>): T | undefined {
-    const items = this.get<T>(key);
+  update(key: DBKey, id: string, changes: any): any {
+    const items = this.get<{ id: string }>(key);
     const idx = items.findIndex((r) => r.id === id);
     if (idx === -1) return undefined;
-    items[idx] = { ...items[idx], ...changes };
+    (items as any[])[idx] = { ...(items as any[])[idx], ...changes };
     this.set(key, items);
-    return items[idx];
+    return (items as any[])[idx];
   }
 
   delete(key: DBKey, id: string): boolean {
