@@ -1,26 +1,18 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
 import { toast } from "sonner";
-import { useDataStore, type UserWithPassword } from "@/stores/dataStore";
+import * as authApi from "@/api/authApi";
+import type { SafeUser } from "@/api/authApi";
 
-export interface User {
-  id: string;
-  name: string;
-  email: string;
-  role: "student" | "admin";
-  avatar: string;
-  joinedAt: string;
-  totalPoints: number;
-  streak: number;
-  completedModules: string[];
-}
+export type User = SafeUser;
 
 interface AuthContextType {
   currentUser: User | null;
-  login: (email: string, password: string) => boolean;
-  register: (name: string, email: string, password: string) => boolean;
-  logout: () => void;
+  login: (email: string, password: string) => Promise<boolean>;
+  register: (name: string, email: string, password: string) => Promise<boolean>;
+  logout: () => Promise<void>;
   updateCurrentUser: (updates: Partial<User>) => void;
-  resetProgress: () => void;
+  resetProgress: () => Promise<void>;
+  refreshUser: () => Promise<void>;
   isAuthenticated: boolean;
   isAdmin: boolean;
 }
@@ -33,75 +25,66 @@ export const useAuth = () => {
   return ctx;
 };
 
-const stripPassword = (u: UserWithPassword): User => {
-  const { password: _, ...rest } = u;
-  return rest;
-};
-
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { users, addUser, updateUser } = useDataStore();
-  const [currentUser, setCurrentUser] = useState<User | null>(() => {
-    const saved = localStorage.getItem("learnops_user");
-    return saved ? JSON.parse(saved) : null;
-  });
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [checked, setChecked] = useState(false);
 
+  // On mount, try to restore session from token
   useEffect(() => {
-    if (currentUser) {
-      localStorage.setItem("learnops_user", JSON.stringify(currentUser));
-    } else {
-      localStorage.removeItem("learnops_user");
-    }
-  }, [currentUser]);
+    authApi.getMe().then((user) => {
+      setCurrentUser(user);
+      setChecked(true);
+    });
+  }, []);
 
-  const login = useCallback((email: string, password: string): boolean => {
-    const user = users.find((u) => u.email === email && u.password === password);
-    if (user) {
-      setCurrentUser(stripPassword(user));
+  const login = useCallback(async (email: string, password: string): Promise<boolean> => {
+    try {
+      const { user } = await authApi.login(email, password);
+      setCurrentUser(user);
       toast.success(`Bienvenue, ${user.name} !`);
       return true;
-    }
-    toast.error("Email ou mot de passe incorrect");
-    return false;
-  }, [users]);
-
-  const register = useCallback((name: string, email: string, password: string): boolean => {
-    if (users.find((u) => u.email === email)) {
-      toast.error("Cet email est déjà utilisé");
+    } catch (e: any) {
+      toast.error(e.message || "Identifiants incorrects");
       return false;
     }
-    addUser({ name, email, password, role: "student" });
-    const newUser = useDataStore.getState().users.find((u) => u.email === email);
-    if (newUser) {
-      setCurrentUser(stripPassword(newUser));
+  }, []);
+
+  const register = useCallback(async (name: string, email: string, password: string): Promise<boolean> => {
+    try {
+      const { user } = await authApi.register(name, email, password);
+      setCurrentUser(user);
       toast.success("Compte créé avec succès !");
       return true;
+    } catch (e: any) {
+      toast.error(e.message || "Erreur lors de l'inscription");
+      return false;
     }
-    return false;
-  }, [users, addUser]);
+  }, []);
 
-  const logout = useCallback(() => {
+  const logout = useCallback(async () => {
+    await authApi.logout();
     setCurrentUser(null);
     toast.info("Déconnexion réussie");
   }, []);
 
   const updateCurrentUser = useCallback((updates: Partial<User>) => {
-    if (!currentUser) return;
-    const updated = { ...currentUser, ...updates };
-    if (updates.name) {
-      updated.avatar = updates.name.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2);
-    }
-    setCurrentUser(updated);
-    updateUser(currentUser.id, updates);
-  }, [currentUser, updateUser]);
+    setCurrentUser((prev) => prev ? { ...prev, ...updates } : null);
+  }, []);
 
-  const resetProgress = useCallback(() => {
-    if (!currentUser) return;
-    const reset = { completedModules: [] as string[], totalPoints: 0, streak: 0 };
-    setCurrentUser({ ...currentUser, ...reset });
-    updateUser(currentUser.id, reset);
-    localStorage.removeItem("learnops_quiz_attempts");
+  const refreshUser = useCallback(async () => {
+    const user = await authApi.getMe();
+    setCurrentUser(user);
+  }, []);
+
+  const resetProgress = useCallback(async () => {
+    const { resetProgress: reset } = await import("@/api/usersApi");
+    await reset();
+    await refreshUser();
     toast.success("Progression réinitialisée");
-  }, [currentUser, updateUser]);
+  }, [refreshUser]);
+
+  // Don't render children until we've checked the token
+  if (!checked) return null;
 
   return (
     <AuthContext.Provider
@@ -112,6 +95,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         logout,
         updateCurrentUser,
         resetProgress,
+        refreshUser,
         isAuthenticated: !!currentUser,
         isAdmin: currentUser?.role === "admin",
       }}
