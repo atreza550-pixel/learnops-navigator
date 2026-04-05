@@ -36,7 +36,7 @@ const AdminModules = () => {
   const inv = () => queryClient.invalidateQueries({ queryKey: ["modules"] });
 
   const addModMutation = useMutation({
-    mutationFn: () => modulesApi.create({ ...formData, id: "" }),
+    mutationFn: () => modulesApi.create(formData as any),
     onSuccess: () => { toast.success("Module ajouté"); setModuleModal({ open: false, editing: null }); inv(); },
   });
 
@@ -51,7 +51,7 @@ const AdminModules = () => {
   });
 
   const addLessonMutation = useMutation({
-    mutationFn: (moduleId: string) => lessonsApiMod.createLesson({ ...lessonData, id: "", moduleId, order: 999 }),
+    mutationFn: (moduleId: string) => lessonsApiMod.createLesson({ ...lessonData, moduleId, order: 999 } as any),
     onSuccess: () => { toast.success("Leçon ajoutée"); setLessonForm({ moduleId: "", editing: null, open: false }); inv(); },
   });
 
