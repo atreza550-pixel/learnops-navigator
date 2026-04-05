@@ -1,33 +1,34 @@
 import { useAuth } from "@/contexts/AuthContext";
-import { useDataStore } from "@/stores/dataStore";
-import { useDelayedLoading } from "@/hooks/useDelayedLoading";
-import { StatCardSkeleton } from "@/components/LoadingSkeletons";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Link } from "react-router-dom";
-import { BookOpen, Trophy, Flame, Star, ArrowRight } from "lucide-react";
+import { BookOpen, Trophy, Flame, Star, ArrowRight, Loader2 } from "lucide-react";
 import { motion } from "framer-motion";
 import { StaggerContainer, StaggerItem, CountUp } from "@/components/AnimatedComponents";
 import AnimatedPage from "@/components/AnimatedPage";
+import { useQuery } from "@tanstack/react-query";
+import * as modulesApi from "@/api/modulesApi";
 
 const Home = () => {
   const { currentUser } = useAuth();
-  const { modules } = useDataStore();
-  const loading = useDelayedLoading(300);
+  const { data: modules, isLoading } = useQuery({
+    queryKey: ["modules"],
+    queryFn: modulesApi.getAll,
+  });
 
   if (!currentUser) return null;
 
-  if (loading) {
+  if (isLoading || !modules) {
     return (
       <AnimatedPage>
         <div className="min-h-screen p-6 max-w-6xl mx-auto space-y-8">
           <Skeleton className="h-10 w-64 bg-secondary" />
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            {Array.from({ length: 3 }).map((_, i) => <StatCardSkeleton key={i} />)}
+            {Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-24 bg-secondary rounded-xl" />)}
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {Array.from({ length: 4 }).map((_, i) => <StatCardSkeleton key={i} />)}
+            {Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-40 bg-secondary rounded-xl" />)}
           </div>
         </div>
       </AnimatedPage>
@@ -43,7 +44,7 @@ const Home = () => {
             <p className="text-muted-foreground">Continuez votre apprentissage</p>
           </div>
           <Link to="/profile">
-            <div className="h-10 w-10 rounded-full gradient-primary-btn flex items-center justify-center text-sm font-bold text-primary-foreground">
+            <div className="h-10 w-10 rounded-full flex items-center justify-center text-sm font-bold text-primary-foreground" style={{ backgroundColor: currentUser.avatarColor }}>
               {currentUser.avatar}
             </div>
           </Link>
@@ -82,17 +83,26 @@ const Home = () => {
                     <Card className="glass-card hover:border-primary/50 transition-colors">
                       <CardHeader className="pb-2">
                         <CardTitle className="flex items-center justify-between text-lg">
-                          <span>{mod.icon} {mod.title}</span>
+                          <span>{mod.title}</span>
                           {completed && <span className="text-xs bg-accent/20 text-accent px-2 py-1 rounded-full">Complété</span>}
                         </CardTitle>
                       </CardHeader>
                       <CardContent className="space-y-3">
                         <p className="text-sm text-muted-foreground">{mod.description}</p>
+                        <div className="w-full bg-secondary rounded-full h-2">
+                          <motion.div
+                            className="h-2 rounded-full"
+                            style={{ backgroundColor: mod.color }}
+                            initial={{ width: 0 }}
+                            animate={{ width: `${mod.progress}%` }}
+                            transition={{ duration: 0.8, ease: "easeOut" }}
+                          />
+                        </div>
                         <div className="flex items-center justify-between">
-                          <span className="text-xs text-muted-foreground">{mod.lessons.length} leçons</span>
+                          <span className="text-xs text-muted-foreground">{mod.totalLessons} leçons · {mod.progress}%</span>
                           <Link to={`/modules/${mod.id}`}>
                             <Button size="sm" variant={completed ? "outline" : "default"} className={!completed ? "gradient-primary-btn text-primary-foreground" : ""}>
-                              {completed ? "Revoir" : "Commencer"} <ArrowRight className="ml-1 h-3 w-3" />
+                              {completed ? "Revoir" : mod.progress > 0 ? "Continuer" : "Commencer"} <ArrowRight className="ml-1 h-3 w-3" />
                             </Button>
                           </Link>
                         </div>

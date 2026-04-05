@@ -1,16 +1,59 @@
 import { useParams, Link } from "react-router-dom";
-import { useDataStore } from "@/stores/dataStore";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import * as lessonsApi from "@/api/lessonsApi";
+import * as modulesApi from "@/api/modulesApi";
 import { Card, CardContent } from "@/components/ui/card";
-import { ArrowLeft, BookOpen, Video, FileText } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
+import { ArrowLeft, BookOpen, Video, FileText, CheckCircle, Loader2 } from "lucide-react";
 import LessonNotes from "@/components/LessonNotes";
 import AnimatedPage from "@/components/AnimatedPage";
+import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "sonner";
+import { motion } from "framer-motion";
 
 const LessonDetail = () => {
   const { moduleId, lessonId } = useParams();
-  const { modules } = useDataStore();
+  const { refreshUser } = useAuth();
+  const queryClient = useQueryClient();
 
-  const mod = modules.find((m) => m.id === moduleId);
-  const lesson = mod?.lessons.find((l) => l.id === lessonId);
+  const { data: mod } = useQuery({
+    queryKey: ["module", moduleId],
+    queryFn: () => modulesApi.getById(moduleId!),
+    enabled: !!moduleId,
+  });
+
+  const { data: lesson, isLoading } = useQuery({
+    queryKey: ["lesson", lessonId],
+    queryFn: () => lessonsApi.getById(lessonId!),
+    enabled: !!lessonId,
+  });
+
+  const completeMutation = useMutation({
+    mutationFn: () => lessonsApi.complete(lessonId!),
+    onSuccess: (result) => {
+      toast.success(`Leçon complétée ! +${result.pointsEarned} pts`);
+      if (result.badgesUnlocked.length > 0) {
+        toast.success(`Badge débloqué : ${result.badgesUnlocked.join(", ")} !`, { icon: "🏅" });
+      }
+      queryClient.invalidateQueries({ queryKey: ["module", moduleId] });
+      queryClient.invalidateQueries({ queryKey: ["lesson", lessonId] });
+      queryClient.invalidateQueries({ queryKey: ["modules"] });
+      refreshUser();
+    },
+    onError: (e: any) => toast.error(e.message || "Erreur"),
+  });
+
+  if (isLoading) {
+    return (
+      <AnimatedPage>
+        <div className="min-h-screen p-6 max-w-4xl mx-auto space-y-6">
+          <Skeleton className="h-6 w-32 bg-secondary" />
+          <Skeleton className="h-64 bg-secondary rounded-xl" />
+        </div>
+      </AnimatedPage>
+    );
+  }
 
   return (
     <AnimatedPage>
@@ -20,7 +63,6 @@ const LessonDetail = () => {
         </Link>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Main content */}
           <div className="lg:col-span-2 space-y-4">
             <Card className="glass-card">
               <CardContent className="p-6 space-y-4">
@@ -33,25 +75,36 @@ const LessonDetail = () => {
                   <p className="text-muted-foreground">{lesson?.type === "video" ? "📹 Contenu vidéo ici" : "📖 Contenu de lecture"}</p>
                 </div>
                 <div className="prose prose-sm prose-invert max-w-none">
-                  <p className="text-muted-foreground leading-relaxed">
-                    {lesson?.content || "Contenu de la leçon..."}
-                  </p>
+                  <p className="text-muted-foreground leading-relaxed">{lesson?.content || "Contenu de la leçon..."}</p>
                 </div>
+
+                {/* Complete button */}
+                {lesson && !lesson.completed && (
+                  <Button
+                    onClick={() => completeMutation.mutate()}
+                    disabled={completeMutation.isPending}
+                    className="w-full gradient-primary-btn text-primary-foreground"
+                  >
+                    {completeMutation.isPending ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Enregistrement...</> : <><CheckCircle className="mr-2 h-4 w-4" /> Marquer comme terminé</>}
+                  </Button>
+                )}
+                {lesson?.completed && (
+                  <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} className="flex items-center justify-center gap-2 p-3 rounded-lg bg-accent/10 text-accent">
+                    <CheckCircle className="h-5 w-5" />
+                    <span className="font-medium">Leçon complétée ✓</span>
+                  </motion.div>
+                )}
               </CardContent>
             </Card>
           </div>
 
-          {/* Sidebar: Notes */}
           <div className="space-y-4">
             <LessonNotes lessonId={`${moduleId}_${lessonId}`} />
-
-            {/* Module info */}
             {mod && (
               <Card className="glass-card">
                 <CardContent className="p-4 space-y-2">
                   <p className="text-sm font-medium flex items-center gap-2">
-                    <BookOpen className="h-4 w-4 text-primary" />
-                    {mod.icon} {mod.title}
+                    <BookOpen className="h-4 w-4 text-primary" /> {mod.title}
                   </p>
                   <p className="text-xs text-muted-foreground">{mod.lessons.length} leçons · {mod.duration}</p>
                 </CardContent>
