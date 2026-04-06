@@ -142,6 +142,36 @@ export interface DBNote {
   id: string; userId: string; lessonId: string; content: string; updatedAt: string;
 }
 
+export interface DBMarketplaceCourse {
+  id: string; instructorId: string; title: string; description: string;
+  thumbnail: string | null; color: string; icon: string;
+  price: number; originalPrice: number; currency: string;
+  category: string; level: string; duration: string;
+  lessonsCount: number; studentsCount: number; rating: number; reviewsCount: number;
+  tags: string[]; status: "published" | "draft"; createdAt: string;
+  highlights: string[];
+}
+
+export interface DBPurchase {
+  id: string; userId: string; courseId: string; amount: number;
+  currency: string; date: string; paymentMethod: string; status: string;
+}
+
+export interface DBReview {
+  id: string; userId: string; courseId: string; rating: number;
+  comment: string; date: string;
+}
+
+export interface DBWallet {
+  userId: string; balance: number; currency: string;
+  transactions: { id: string; type: "credit" | "debit"; amount: number; description: string; date: string }[];
+}
+
+export interface DBCoupon {
+  code: string; discount: number; type: "percent" | "fixed";
+  maxUses: number; usedCount: number; expiresAt: string; active: boolean;
+}
+
 const today = new Date().toISOString().split("T")[0];
 const yesterday = new Date(Date.now() - 86400000).toISOString().split("T")[0];
 
