@@ -17,10 +17,18 @@ import ModuleDetail from "@/pages/ModuleDetail";
 import LessonDetail from "@/pages/LessonDetail";
 import Quiz from "@/pages/Quiz";
 import Leaderboard from "@/pages/Leaderboard";
+import Marketplace from "@/pages/Marketplace";
+import CourseDetail from "@/pages/CourseDetail";
+import MyCourses from "@/pages/MyCourses";
+import WalletPage from "@/pages/WalletPage";
+import InstructorDashboard from "@/pages/InstructorDashboard";
+import InstructorCourses from "@/pages/InstructorCourses";
+import CreateCourse from "@/pages/CreateCourse";
 import AdminOverview from "@/pages/admin/AdminOverview";
 import AdminUsers from "@/pages/admin/AdminUsers";
 import AdminModules from "@/pages/admin/AdminModules";
 import AdminAnalytics from "@/pages/admin/AdminAnalytics";
+import AdminMarketplace from "@/pages/admin/AdminMarketplace";
 import NotFound from "@/pages/NotFound";
 import { AnimatePresence } from "framer-motion";
 
@@ -40,6 +48,14 @@ const AdminRoute = ({ children }: { children: React.ReactNode }) => (
   </ProtectedRoute>
 );
 
+const InstructorRoute = ({ children }: { children: React.ReactNode }) => (
+  <ProtectedRoute>
+    <div className="pb-20">{children}</div>
+    <AppNavbar />
+    <HelpButton />
+  </ProtectedRoute>
+);
+
 const AnimatedRoutes = () => {
   const location = useLocation();
   return (
@@ -52,6 +68,14 @@ const AnimatedRoutes = () => {
         <Route path="/dashboard" element={<ProtectedLayout><Dashboard /></ProtectedLayout>} />
         <Route path="/profile" element={<ProtectedLayout><Profile /></ProtectedLayout>} />
         <Route path="/leaderboard" element={<ProtectedLayout><Leaderboard /></ProtectedLayout>} />
+        <Route path="/marketplace" element={<ProtectedLayout><Marketplace /></ProtectedLayout>} />
+        <Route path="/marketplace/:courseId" element={<ProtectedLayout><CourseDetail /></ProtectedLayout>} />
+        <Route path="/my-courses" element={<ProtectedLayout><MyCourses /></ProtectedLayout>} />
+        <Route path="/wallet" element={<ProtectedLayout><WalletPage /></ProtectedLayout>} />
+        <Route path="/instructor" element={<InstructorRoute><InstructorDashboard /></InstructorRoute>} />
+        <Route path="/instructor/courses" element={<InstructorRoute><InstructorCourses /></InstructorRoute>} />
+        <Route path="/instructor/courses/new" element={<InstructorRoute><CreateCourse /></InstructorRoute>} />
+        <Route path="/instructor/courses/:id" element={<InstructorRoute><CreateCourse /></InstructorRoute>} />
         <Route path="/modules/:moduleId" element={<ProtectedLayout><ModuleDetail /></ProtectedLayout>} />
         <Route path="/modules/:moduleId/lessons/:lessonId" element={<ProtectedLayout><LessonDetail /></ProtectedLayout>} />
         <Route path="/quiz/:moduleId" element={<ProtectedLayout><Quiz /></ProtectedLayout>} />
@@ -59,6 +83,7 @@ const AnimatedRoutes = () => {
         <Route path="/admin/users" element={<AdminRoute><AdminUsers /></AdminRoute>} />
         <Route path="/admin/modules" element={<AdminRoute><AdminModules /></AdminRoute>} />
         <Route path="/admin/analytics" element={<AdminRoute><AdminAnalytics /></AdminRoute>} />
+        <Route path="/admin/marketplace" element={<AdminRoute><AdminMarketplace /></AdminRoute>} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </AnimatePresence>

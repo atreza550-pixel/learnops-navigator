@@ -9,6 +9,11 @@ const DB_KEYS = {
   notifications: "loj_notifications",
   notes: "loj_notes",
   token: "loj_token",
+  marketplace: "loj_marketplace",
+  purchases: "loj_purchases",
+  reviews: "loj_reviews",
+  wallet: "loj_wallet",
+  coupons: "loj_coupons",
 } as const;
 
 export type DBKey = keyof typeof DB_KEYS;
@@ -71,7 +76,9 @@ class Database {
   }
 
   seed(): void {
-    if (localStorage.getItem("loj_seeded")) return;
+    if (localStorage.getItem("loj_seeded_v2")) return;
+    // Clear old seed flag
+    localStorage.removeItem("loj_seeded");
     this.set("users", seedUsers);
     this.set("modules", seedModules);
     this.set("lessons", seedLessons);
@@ -80,7 +87,12 @@ class Database {
     this.set("attempts", seedAttempts);
     this.set("notifications", seedNotifications);
     this.set("notes", []);
-    localStorage.setItem("loj_seeded", "1");
+    this.set("marketplace", seedMarketplace);
+    this.set("purchases", seedPurchases);
+    this.set("reviews", seedReviews);
+    this.set("wallet", seedWallets);
+    this.set("coupons", seedCoupons);
+    localStorage.setItem("loj_seeded_v2", "1");
   }
 }
 
@@ -128,6 +140,36 @@ export interface DBNotification {
 
 export interface DBNote {
   id: string; userId: string; lessonId: string; content: string; updatedAt: string;
+}
+
+export interface DBMarketplaceCourse {
+  id: string; instructorId: string; title: string; description: string;
+  thumbnail: string | null; color: string; icon: string;
+  price: number; originalPrice: number; currency: string;
+  category: string; level: string; duration: string;
+  lessonsCount: number; studentsCount: number; rating: number; reviewsCount: number;
+  tags: string[]; status: "published" | "draft"; createdAt: string;
+  highlights: string[];
+}
+
+export interface DBPurchase {
+  id: string; userId: string; courseId: string; amount: number;
+  currency: string; date: string; paymentMethod: string; status: string;
+}
+
+export interface DBReview {
+  id: string; userId: string; courseId: string; rating: number;
+  comment: string; date: string;
+}
+
+export interface DBWallet {
+  userId: string; balance: number; currency: string;
+  transactions: { id: string; type: "credit" | "debit"; amount: number; description: string; date: string }[];
+}
+
+export interface DBCoupon {
+  code: string; discount: number; type: "percent" | "fixed";
+  maxUses: number; usedCount: number; expiresAt: string; active: boolean;
 }
 
 const today = new Date().toISOString().split("T")[0];
@@ -254,6 +296,40 @@ const seedNotifications: DBNotification[] = [
   { id: "n3", userId: "u1", type: "info", message: "Nouveau module disponible : Kubernetes Avancé", time: "Il y a 2j", read: true, createdAt: new Date(Date.now() - 172800000).toISOString() },
   { id: "n4", userId: "u1", type: "warning", message: "Votre streak est en danger ! Connectez-vous aujourd'hui", time: "Il y a 3j", read: true, createdAt: new Date(Date.now() - 259200000).toISOString() },
   { id: "n5", userId: "u1", type: "success", message: "Quiz DevOps réussi avec 80% !", time: "Il y a 5j", read: true, createdAt: new Date(Date.now() - 432000000).toISOString() },
+];
+
+const seedMarketplace: DBMarketplaceCourse[] = [
+  { id: "mc1", instructorId: "u7", title: "Kubernetes Avancé", description: "Maîtrisez l'orchestration de containers avec Kubernetes : pods, services, ingress, Helm charts et déploiement en production.", thumbnail: null, color: "#6366f1", icon: "Server", price: 49.99, originalPrice: 89.99, currency: "TND", category: "DevOps", level: "Avancé", duration: "8h", lessonsCount: 12, studentsCount: 234, rating: 4.8, reviewsCount: 47, tags: ["kubernetes", "docker", "devops", "k8s"], status: "published", createdAt: "2025-03-01", highlights: ["12 leçons HD", "Projets pratiques", "Certificat inclus", "Support instructor"] },
+  { id: "mc2", instructorId: "u7", title: "Terraform & Infrastructure as Code", description: "Automatisez votre infrastructure cloud avec Terraform. AWS, GCP, Azure — provisionnez tout en code.", thumbnail: null, color: "#f59e0b", icon: "Cloud", price: 59.99, originalPrice: 99.99, currency: "TND", category: "DevOps", level: "Intermédiaire", duration: "6h", lessonsCount: 9, studentsCount: 178, rating: 4.6, reviewsCount: 32, tags: ["terraform", "aws", "iac", "cloud"], status: "published", createdAt: "2025-03-15", highlights: ["9 leçons", "Labs AWS inclus", "Certificat", "Code source fourni"] },
+  { id: "mc3", instructorId: "u7", title: "Python pour la Data Science", description: "De zéro à héros en Python : NumPy, Pandas, Matplotlib, Scikit-learn. Construisez vos premiers modèles ML.", thumbnail: null, color: "#10b981", icon: "BarChart", price: 39.99, originalPrice: 69.99, currency: "TND", category: "MLOps", level: "Débutant", duration: "10h", lessonsCount: 15, studentsCount: 412, rating: 4.9, reviewsCount: 89, tags: ["python", "data science", "ml", "pandas"], status: "published", createdAt: "2025-02-20", highlights: ["15 leçons", "Notebooks Jupyter", "Certificat", "Projets réels"] },
+  { id: "mc4", instructorId: "u7", title: "CI/CD avec Jenkins & GitLab", description: "Construisez des pipelines CI/CD robustes avec Jenkins et GitLab CI. Tests, build, deploy automatisés.", thumbnail: null, color: "#0ea5e9", icon: "GitMerge", price: 44.99, originalPrice: 79.99, currency: "TND", category: "DevOps", level: "Intermédiaire", duration: "7h", lessonsCount: 10, studentsCount: 156, rating: 4.5, reviewsCount: 28, tags: ["jenkins", "gitlab", "ci/cd", "automation"], status: "published", createdAt: "2025-04-01", highlights: ["10 leçons", "Jenkins + GitLab", "Certificat", "Support 30j"] },
+  { id: "mc5", instructorId: "u7", title: "Prometheus & Grafana Monitoring", description: "Mettez en place un système de monitoring complet : métriques, alertes, dashboards Grafana.", thumbnail: null, color: "#8b5cf6", icon: "Activity", price: 34.99, originalPrice: 59.99, currency: "TND", category: "DevOps", level: "Intermédiaire", duration: "5h", lessonsCount: 8, studentsCount: 98, rating: 4.7, reviewsCount: 21, tags: ["prometheus", "grafana", "monitoring", "observability"], status: "draft", createdAt: "2025-05-01", highlights: ["8 leçons", "Dashboards inclus", "Alerting", "Labs pratiques"] },
+];
+
+const seedPurchases: DBPurchase[] = [
+  { id: "p_1", userId: "u1", courseId: "mc3", amount: 39.99, currency: "TND", date: "2025-05-10", paymentMethod: "card", status: "completed" },
+  { id: "p_2", userId: "u4", courseId: "mc1", amount: 49.99, currency: "TND", date: "2025-05-15", paymentMethod: "card", status: "completed" },
+  { id: "p_3", userId: "u6", courseId: "mc1", amount: 0, currency: "TND", date: "2025-05-20", paymentMethod: "coupon", status: "completed" },
+];
+
+const seedReviews: DBReview[] = [
+  { id: "r1", userId: "u4", courseId: "mc1", rating: 5, comment: "Excellent cours, très complet et bien expliqué !", date: "2025-05-20" },
+  { id: "r2", userId: "u6", courseId: "mc1", rating: 4, comment: "Très bon contenu. Quelques exercices supplémentaires seraient utiles.", date: "2025-05-22" },
+  { id: "r3", userId: "u1", courseId: "mc3", rating: 5, comment: "Parfait pour débuter en Data Science. Je recommande vivement !", date: "2025-05-18" },
+];
+
+const seedWallets: DBWallet[] = [
+  { userId: "u1", balance: 150.00, currency: "TND", transactions: [
+    { id: "t1", type: "credit", amount: 200.00, description: "Rechargement initial", date: "2025-05-01" },
+    { id: "t2", type: "debit", amount: 39.99, description: "Achat: Python pour la Data Science", date: "2025-05-10" },
+    { id: "t3", type: "credit", amount: 10.00, description: "Bonus parrainage", date: "2025-05-12" },
+  ]},
+];
+
+const seedCoupons: DBCoupon[] = [
+  { code: "LEARNOPS50", discount: 50, type: "percent", maxUses: 100, usedCount: 3, expiresAt: "2025-12-31", active: true },
+  { code: "FREE100", discount: 100, type: "percent", maxUses: 10, usedCount: 1, expiresAt: "2025-07-01", active: true },
+  { code: "TND20", discount: 20, type: "fixed", maxUses: 50, usedCount: 5, expiresAt: "2025-09-01", active: true },
 ];
 
 // Singleton
