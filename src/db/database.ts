@@ -9,6 +9,11 @@ const DB_KEYS = {
   notifications: "loj_notifications",
   notes: "loj_notes",
   token: "loj_token",
+  marketplace: "loj_marketplace",
+  purchases: "loj_purchases",
+  reviews: "loj_reviews",
+  wallet: "loj_wallet",
+  coupons: "loj_coupons",
 } as const;
 
 export type DBKey = keyof typeof DB_KEYS;
