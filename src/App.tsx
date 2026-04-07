@@ -24,6 +24,8 @@ import WalletPage from "@/pages/WalletPage";
 import InstructorDashboard from "@/pages/InstructorDashboard";
 import InstructorCourses from "@/pages/InstructorCourses";
 import CreateCourse from "@/pages/CreateCourse";
+import TerminalPage from "@/pages/TerminalPage";
+import TerminalLabPage from "@/pages/TerminalLabPage";
 import AdminOverview from "@/pages/admin/AdminOverview";
 import AdminUsers from "@/pages/admin/AdminUsers";
 import AdminModules from "@/pages/admin/AdminModules";
@@ -79,6 +81,8 @@ const AnimatedRoutes = () => {
         <Route path="/modules/:moduleId" element={<ProtectedLayout><ModuleDetail /></ProtectedLayout>} />
         <Route path="/modules/:moduleId/lessons/:lessonId" element={<ProtectedLayout><LessonDetail /></ProtectedLayout>} />
         <Route path="/quiz/:moduleId" element={<ProtectedLayout><Quiz /></ProtectedLayout>} />
+        <Route path="/terminal" element={<ProtectedLayout><TerminalPage /></ProtectedLayout>} />
+        <Route path="/terminal/lab/:labId" element={<ProtectedLayout><TerminalLabPage /></ProtectedLayout>} />
         <Route path="/admin" element={<AdminRoute><AdminOverview /></AdminRoute>} />
         <Route path="/admin/users" element={<AdminRoute><AdminUsers /></AdminRoute>} />
         <Route path="/admin/modules" element={<AdminRoute><AdminModules /></AdminRoute>} />
