@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
-import { User, Trophy, Flame, Calendar, BookOpen, Star, Shield, Lock, AlertTriangle, Save, CheckCircle, Loader2 } from "lucide-react";
+import { User, Trophy, Flame, Calendar, BookOpen, Star, Shield, Lock, AlertTriangle, Save, CheckCircle, Loader2, LogOut } from "lucide-react";
 import { toast } from "sonner";
 import AnimatedPage from "@/components/AnimatedPage";
 
