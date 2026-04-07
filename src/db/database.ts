@@ -78,9 +78,10 @@ class Database {
   }
 
   seed(): void {
-    if (localStorage.getItem("loj_seeded_v2")) return;
-    // Clear old seed flag
+    if (localStorage.getItem("loj_seeded_v3")) return;
+    // Clear old seed flags
     localStorage.removeItem("loj_seeded");
+    localStorage.removeItem("loj_seeded_v2");
     this.set("users", seedUsers);
     this.set("modules", seedModules);
     this.set("lessons", seedLessons);
@@ -94,7 +95,9 @@ class Database {
     this.set("reviews", seedReviews);
     this.set("wallet", seedWallets);
     this.set("coupons", seedCoupons);
-    localStorage.setItem("loj_seeded_v2", "1");
+    this.set("terminalLabs", seedTerminalLabs);
+    this.set("terminalProgress", []);
+    localStorage.setItem("loj_seeded_v3", "1");
   }
 }
 
