@@ -337,6 +337,59 @@ const seedCoupons: DBCoupon[] = [
   { code: "TND20", discount: 20, type: "fixed", maxUses: 50, usedCount: 5, expiresAt: "2025-09-01", active: true },
 ];
 
+const seedTerminalLabs = [
+  {
+    id: "lab1", moduleId: "mod1", title: "Découverte Git",
+    description: "Apprenez les commandes Git de base dans un environnement réel.",
+    difficulty: "Débutant", estimatedTime: "15min",
+    objectives: ["Initialiser un dépôt Git", "Faire votre premier commit", "Créer et merger une branche"],
+    steps: [
+      { id: "s1", instruction: "Initialisez un nouveau dépôt Git dans le dossier courant", hint: "Utilisez git init", expectedCommands: ["git init"], successMessage: "Dépôt Git initialisé avec succès !" },
+      { id: "s2", instruction: "Créez un fichier README.md et ajoutez-le au staging", hint: "touch README.md puis git add README.md", expectedCommands: ["touch README.md", "git add README.md", "git add ."], successMessage: "Fichier ajouté au staging !" },
+      { id: "s3", instruction: "Faites votre premier commit", hint: "git commit -m 'Initial commit'", expectedCommands: ["git commit"], successMessage: "Premier commit créé !" },
+      { id: "s4", instruction: "Créez une nouvelle branche nommée 'feature'", hint: "git checkout -b feature", expectedCommands: ["git checkout -b feature", "git branch feature"], successMessage: "Branche feature créée !" },
+      { id: "s5", instruction: "Revenez sur la branche main et mergez feature", hint: "git checkout main && git merge feature", expectedCommands: ["git checkout main", "git merge feature"], successMessage: "Branches mergées avec succès !" },
+    ],
+  },
+  {
+    id: "lab2", moduleId: "mod2", title: "Pipeline CI/CD GitHub Actions",
+    description: "Créez votre premier workflow GitHub Actions de zéro.",
+    difficulty: "Intermédiaire", estimatedTime: "20min",
+    objectives: ["Créer la structure de fichiers GitHub Actions", "Configurer les triggers du workflow", "Ajouter des jobs de test et de build"],
+    steps: [
+      { id: "s1", instruction: "Créez le dossier .github/workflows", hint: "mkdir -p .github/workflows", expectedCommands: ["mkdir -p .github/workflows", "mkdir .github"], successMessage: "Structure créée !" },
+      { id: "s2", instruction: "Créez le fichier de workflow ci.yml", hint: "touch .github/workflows/ci.yml", expectedCommands: ["touch .github/workflows/ci.yml"], successMessage: "Fichier workflow créé !" },
+      { id: "s3", instruction: "Listez le contenu du dossier .github/workflows", hint: "ls .github/workflows", expectedCommands: ["ls .github/workflows", "ls -la .github/workflows"], successMessage: "Parfait !" },
+      { id: "s4", instruction: "Vérifiez la syntaxe YAML du workflow", hint: "cat .github/workflows/ci.yml", expectedCommands: ["cat .github/workflows/ci.yml"], successMessage: "Workflow validé !" },
+    ],
+  },
+  {
+    id: "lab3", moduleId: "mod3", title: "Docker Fundamentals",
+    description: "Maîtrisez les commandes Docker essentielles en pratique.",
+    difficulty: "Intermédiaire", estimatedTime: "25min",
+    objectives: ["Builder une image Docker", "Lancer et gérer des containers", "Utiliser Docker Compose"],
+    steps: [
+      { id: "s1", instruction: "Vérifiez que Docker est installé et sa version", hint: "docker --version", expectedCommands: ["docker --version", "docker version"], successMessage: "Docker v24.0.5 détecté !" },
+      { id: "s2", instruction: "Listez les images Docker disponibles", hint: "docker images", expectedCommands: ["docker images", "docker image ls"], successMessage: "Images listées !" },
+      { id: "s3", instruction: "Lancez un container nginx en arrière-plan sur le port 8080", hint: "docker run -d -p 8080:80 nginx", expectedCommands: ["docker run -d -p 8080:80 nginx", "docker run"], successMessage: "Container nginx lancé sur :8080 !" },
+      { id: "s4", instruction: "Listez les containers en cours d'exécution", hint: "docker ps", expectedCommands: ["docker ps"], successMessage: "1 container actif détecté !" },
+      { id: "s5", instruction: "Arrêtez tous les containers", hint: "docker stop $(docker ps -q)", expectedCommands: ["docker stop", "docker kill"], successMessage: "Tous les containers arrêtés !" },
+    ],
+  },
+  {
+    id: "lab4", moduleId: "mod4", title: "MLflow Experiment Tracking",
+    description: "Trackez vos expériences ML avec MLflow comme un pro.",
+    difficulty: "Avancé", estimatedTime: "30min",
+    objectives: ["Initialiser MLflow", "Logger des métriques et paramètres", "Comparer des expériences"],
+    steps: [
+      { id: "s1", instruction: "Initialisez MLflow dans votre projet", hint: "mlflow ui --port 5000", expectedCommands: ["mlflow ui", "mlflow"], successMessage: "MLflow UI démarré sur http://localhost:5000 !" },
+      { id: "s2", instruction: "Créez une nouvelle expérience nommée 'my-experiment'", hint: "mlflow experiments create -n my-experiment", expectedCommands: ["mlflow experiments create", "mlflow experiments"], successMessage: "Expérience créée avec ID: 1" },
+      { id: "s3", instruction: "Listez toutes les expériences disponibles", hint: "mlflow experiments list", expectedCommands: ["mlflow experiments list"], successMessage: "1 expérience trouvée : my-experiment" },
+      { id: "s4", instruction: "Lancez un run et loggez des métriques", hint: "mlflow run . --param-list lr=0.01", expectedCommands: ["mlflow run", "python train.py"], successMessage: "Run complété ! accuracy=0.94, loss=0.12" },
+    ],
+  },
+];
+
 // Singleton
 export const db = new Database();
 db.seed();
