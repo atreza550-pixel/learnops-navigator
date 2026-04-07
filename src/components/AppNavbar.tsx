@@ -43,7 +43,7 @@ const AppNavbar = () => {
 
       <div className="max-w-lg mx-auto flex justify-around py-2">
         {links.map((l) => {
-          const active = l.to === "/admin" ? pathname.startsWith("/admin") : l.to === "/instructor" ? pathname.startsWith("/instructor") : l.to === "/marketplace" ? pathname.startsWith("/marketplace") : pathname === l.to;
+          const active = l.to === "/admin" ? pathname.startsWith("/admin") : l.to === "/instructor" ? pathname.startsWith("/instructor") : l.to === "/marketplace" ? pathname.startsWith("/marketplace") : l.to === "/terminal" ? pathname.startsWith("/terminal") : pathname === l.to;
           return (
             <Link key={l.to} to={l.to} className="relative flex flex-col items-center gap-0.5 px-2 py-1 rounded-lg transition-colors">
               <l.icon className={`h-5 w-5 ${active ? "text-primary" : "text-muted-foreground"}`} />
