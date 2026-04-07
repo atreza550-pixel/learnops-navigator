@@ -14,6 +14,8 @@ const DB_KEYS = {
   reviews: "loj_reviews",
   wallet: "loj_wallet",
   coupons: "loj_coupons",
+  terminalLabs: "loj_terminal_labs",
+  terminalProgress: "loj_terminal_progress",
 } as const;
 
 export type DBKey = keyof typeof DB_KEYS;
