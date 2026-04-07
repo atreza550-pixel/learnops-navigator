@@ -1,7 +1,7 @@
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useThemeStore } from "@/stores/themeStore";
-import { Home, BarChart3, User, Shield, Trophy, Sun, Moon, ShoppingBag, BookOpen, Wallet, GraduationCap } from "lucide-react";
+import { Home, BarChart3, User, Shield, Trophy, Sun, Moon, ShoppingBag, BookOpen, Wallet, GraduationCap, TerminalSquare } from "lucide-react";
 import NotificationBell from "@/components/NotificationBell";
 import GlobalSearch from "@/components/GlobalSearch";
 import { motion } from "framer-motion";
@@ -16,6 +16,7 @@ const AppNavbar = () => {
   const links = [
     { to: "/home", icon: Home, label: "Accueil" },
     { to: "/marketplace", icon: ShoppingBag, label: "Marketplace" },
+    { to: "/terminal", icon: TerminalSquare, label: "Terminal" },
     { to: "/dashboard", icon: BarChart3, label: "Dashboard" },
     { to: "/leaderboard", icon: Trophy, label: "Classement" },
     { to: "/profile", icon: User, label: "Profil" },
