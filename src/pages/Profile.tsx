@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useMutation } from "@tanstack/react-query";
 import * as usersApi from "@/api/usersApi";
@@ -6,12 +7,13 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
-import { User, Trophy, Flame, Calendar, BookOpen, Star, Shield, Lock, AlertTriangle, Save, CheckCircle, Loader2 } from "lucide-react";
+import { User, Trophy, Flame, Calendar, BookOpen, Star, Shield, Lock, AlertTriangle, Save, CheckCircle, Loader2, LogOut } from "lucide-react";
 import { toast } from "sonner";
 import AnimatedPage from "@/components/AnimatedPage";
 
 const Profile = () => {
-  const { currentUser, updateCurrentUser, resetProgress, refreshUser } = useAuth();
+  const { currentUser, updateCurrentUser, resetProgress, refreshUser, logout } = useAuth();
+  const navigate = useNavigate();
   const [name, setName] = useState(currentUser?.name || "");
   const [email, setEmail] = useState(currentUser?.email || "");
   const [oldPw, setOldPw] = useState("");
@@ -105,6 +107,18 @@ const Profile = () => {
             <Input placeholder="Confirmer le mot de passe" type="password" value={confirmPw} onChange={(e) => setConfirmPw(e.target.value)} className="bg-secondary border-border" />
             <Button onClick={handleChangePassword} variant="outline" className="w-full" disabled={passwordMutation.isPending}>
               {passwordMutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null} Changer le mot de passe
+            </Button>
+          </CardContent>
+        </Card>
+
+        <Card className="glass-card">
+          <CardContent className="p-6">
+            <Button
+              variant="outline"
+              className="w-full border-destructive/50 text-destructive hover:bg-destructive hover:text-destructive-foreground"
+              onClick={async () => { await logout(); navigate("/login"); }}
+            >
+              <LogOut className="mr-2 h-4 w-4" /> Se déconnecter
             </Button>
           </CardContent>
         </Card>
