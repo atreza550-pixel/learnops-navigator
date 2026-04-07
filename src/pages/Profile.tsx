@@ -11,7 +11,8 @@ import { toast } from "sonner";
 import AnimatedPage from "@/components/AnimatedPage";
 
 const Profile = () => {
-  const { currentUser, updateCurrentUser, resetProgress, refreshUser } = useAuth();
+  const { currentUser, updateCurrentUser, resetProgress, refreshUser, logout } = useAuth();
+  const navigate = useNavigate();
   const [name, setName] = useState(currentUser?.name || "");
   const [email, setEmail] = useState(currentUser?.email || "");
   const [oldPw, setOldPw] = useState("");
