@@ -111,6 +111,18 @@ const Profile = () => {
           </CardContent>
         </Card>
 
+        <Card className="glass-card">
+          <CardContent className="p-6">
+            <Button
+              variant="outline"
+              className="w-full border-destructive/50 text-destructive hover:bg-destructive hover:text-destructive-foreground"
+              onClick={async () => { await logout(); navigate("/login"); }}
+            >
+              <LogOut className="mr-2 h-4 w-4" /> Se déconnecter
+            </Button>
+          </CardContent>
+        </Card>
+
         <Card className="glass-card border-destructive/30">
           <CardHeader><CardTitle className="text-base text-destructive flex items-center gap-2"><AlertTriangle className="h-4 w-4" /> Zone de danger</CardTitle></CardHeader>
           <CardContent>
